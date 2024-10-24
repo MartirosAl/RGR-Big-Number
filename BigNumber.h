@@ -5,7 +5,7 @@ using namespace std;
 
 class BigNumber
 {
-   unsigned short int* number;   //Большое число записанное в виде массива char
+   unsigned short int* number;   //Большое число записанное в виде массива целых неотрицательных чисел
    size_t size;                  //Количество цифр в числе
    size_t capasity;              //Количество цифр для которых выделена память
 
@@ -18,6 +18,12 @@ public:
    unsigned short int& operator[](int index) const;
 
    unsigned short int& operator[](int index);
+
+   BigNumber& operator=(const BigNumber& other_);
+
+   BigNumber& operator+=(const BigNumber& other_) const;
+
+   void Number_Shift(int index);
 
    void Expansion();
 
