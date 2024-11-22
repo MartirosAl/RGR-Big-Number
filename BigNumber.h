@@ -14,7 +14,7 @@ class BigNumber
 
 public:
 
-   BigNumber(size_t new_cap_);
+   BigNumber(size_t new_cap_ = 100);
 
    BigNumber(const Nial* number_, const size_t size_);
 
@@ -34,7 +34,9 @@ public:
 
    BigNumber operator+(BigNumber& other_);
 
-   BigNumber& operator+=(const BigNumber& other_);
+   BigNumber operator*(BigNumber& other_);
+
+
 
    //Полное очищение массива
    void Clear();

@@ -95,8 +95,9 @@ BigNumber BigNumber::operator+(BigNumber& other_)
       min_number = this;
    }
 
-   BigNumber tempBN(*max_number);
    //¬ыбираем где больше места, чтобы меньше трогать Expansion
+   BigNumber tempBN(*max_number);
+
 
    Nial adddigit = 0;
 
@@ -137,6 +138,29 @@ BigNumber BigNumber::operator+(BigNumber& other_)
    
    return tempBN;
 }
+
+BigNumber BigNumber::operator*(BigNumber& other_)
+{
+   BigNumber* tempBN = new BigNumber(size + other_.size);
+   for (size_t i = 0; i < tempBN->capacity; i++)
+      (*tempBN)[i] = 0;
+
+   for (size_t i = 0; i < size; i++)
+   {
+      for (size_t j = 0; j < other_.size; j++)
+      {
+         (*tempBN)[i + j] += number[i] * other_[j];
+         (*tempBN)[i + j + 1] += (*tempBN)[i + j] / 10;
+         (*tempBN)[i + j] %= 10;
+      }
+   }
+   tempBN->size = size + other_.size - 1;
+   if ((*tempBN)[tempBN->size] != 0)
+      size++;
+   return (*tempBN);
+}
+
+
 
 void BigNumber::Clear()
 {
@@ -245,6 +269,7 @@ istream& operator>>(istream& stream, BigNumber& object_)
       stream.get(digit, 2);
       if (digit[0] < '0' || digit[0] > '9')
       {
+         stream.clear();
          stream.setstate(ios::badbit);
 
          delete[] object_.number;
