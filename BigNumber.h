@@ -16,7 +16,7 @@ public:
 
    BigNumber(size_t new_cap_);
 
-   BigNumber(Nial* number_, size_t size_);
+   BigNumber(const Nial* number_, const size_t size_);
 
    ~BigNumber();
 
@@ -32,20 +32,18 @@ public:
 
    BigNumber& operator=(const BigNumber& other_);
 
-   BigNumber operator+(const BigNumber& other_) const;
+   BigNumber operator+(BigNumber& other_);
 
    BigNumber& operator+=(const BigNumber& other_);
 
    //Полное очищение массива
    void Clear();
 
-   //Сдвиг чисел. Если index_ > 0, до увеличение разрядов на index_, если <, то удаление последних разрядов.
-   //void Number_Shift(int index_);
-
+   //Сдвиг чисел. Увеличение разрядов на index_
    void Number_Shift(size_t index_);
 
 
-   //Расширение массива на size + 100
+   //Расширение массива на capacity + 100
    void Expansion();
 
    //Расширение массива до new_cap_, если new_cap_ > capasity

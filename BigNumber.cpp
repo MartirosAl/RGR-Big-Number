@@ -7,7 +7,7 @@ BigNumber::BigNumber(size_t new_cap_)
    size = 0;
 }
 
-BigNumber::BigNumber(Nial* number_, size_t size_)
+BigNumber::BigNumber(const Nial* number_, const size_t size_)
 {
    size_t i = 1;
    for (i = 1; 100 * i < size_; i++);
@@ -80,82 +80,62 @@ BigNumber& BigNumber::operator=(const BigNumber& other_)
    return *this;
 }
 
-BigNumber BigNumber::operator+(const BigNumber& other_) const
+BigNumber BigNumber::operator+(BigNumber& other_) 
 {
-   BigNumber tempBN(capacity < other_.capacity ? other_ : *this);
+   BigNumber* max_number;
+   BigNumber* min_number;
+   if (size > other_.size)
+   {
+      max_number = this;
+      min_number = &other_;
+   }
+   else
+   {
+      max_number = &other_;
+      min_number = this;
+   }
+
+   BigNumber tempBN(*max_number);
    //¬ыбираем где больше места, чтобы меньше трогать Expansion
 
    Nial adddigit = 0;
-   
-   for (size_t i = 0; i < size || i < other_.size; i++)
+
+   for (size_t i = 0; i < min_number->size; i++)
    {
-      Nial temp = number[i] + other_[i] + adddigit;
-      tempBN[i] = temp % 10;
-      adddigit = temp / 10;
+      tempBN[i] = ((*max_number)[i] + (*min_number)[i] + adddigit) % 10;
+      adddigit = ((*max_number)[i] + (*min_number)[i] + adddigit) / 10;
    }
 
-   if (adddigit && size == other_.size)
+   if (max_number->size == min_number->size)
    {
-      if (size == capacity)
-         tempBN.Expansion(size + 1);
-      tempBN[size] = adddigit;
-   }
-   
-   //—мотрим что больше и дополн€ем до него
-   for (size_t i = (size < other_.size ? size : other_.size) + 1; i < (size < other_.size ? other_.size : size); i++)
-   {
-      tempBN[i] = (size < other_.size ? number[i] : other_[i]);
-   }
-
-   tempBN.size += size - other_.size ? size - other_.size : other_.size - size;
-
-   return tempBN;
-}
-
-BigNumber& BigNumber::operator+=(const BigNumber& other_)
-{
-   if (capacity < other_.size)
-      Expansion(other_.capacity);
-
-   Nial adddigit = 0;
-   // ≈сли другое число больше нашего, тогда мы уже сделали расширение или нам достаточно места
-   // ѕросто складываем одну цифру с другой и кладем по местам 
-   if (size < other_.size)
-   {
-      for (size_t i = 0; i < size; i++)
+      if (adddigit)
       {
-         Nial temp = number[i] + other_[i] + adddigit;
-         number[i] = temp % 10;
-         adddigit = temp / 10;
+         if (size == tempBN.capacity)
+            tempBN.Expansion();
+         tempBN[size] = adddigit;
+
+         tempBN.size++;
       }
-      number[size] = adddigit + other_[size];
-
-      for (size_t i = size + 1; i < other_.size; i++)
-         number[i] = other_[i];
-
-      size = other_.size;
-      return *this;
+      return tempBN;
    }
 
-   for (size_t i = 0; i < other_.size; i++)
+   //—мотрим что больше и дополн€ем до него
+   for (size_t i = min_number->size; i < max_number->size; i++)
    {
-      Nial temp = number[i] + other_[i] + adddigit;
-      number[i] = temp % 10;
-      adddigit = temp / 10;
+      tempBN[i] = (adddigit + (*max_number)[i]) % 10;
+      adddigit = (adddigit + (*max_number)[i]) / 10;
+
    }
 
-   // ≈сли мы пропустили size < other_.size, то значит размер у нас либо такой же либо больше,
-   // а следовательно и выделенна€ пам€ть тоже либо больше либо равна                          
-   if (adddigit && size == other_.size)
+   if (adddigit)
    {
-      if (size == capacity)
-         Expansion();
-      number[size] = adddigit;
-      size++;
+      if (max_number->size == tempBN.capacity)
+         tempBN.Expansion();
+      tempBN[max_number->size] = adddigit;
+      tempBN.size++;
    }
-
-   return *this;
-      
+   
+   return tempBN;
 }
 
 void BigNumber::Clear()
@@ -165,47 +145,6 @@ void BigNumber::Clear()
    size = 0;
    capacity = 0;
 }
-
-
-//void BigNumber::Number_Shift(int index_)
-//{
-//   //отдельно случай, когда значений нет
-//   if (size == 0)
-//   {
-//      if (capacity < index_)
-//         Expansion();
-//      for (size_t i = 0; i < index_; i++)
-//         number[i] = 0;
-//      size += index_;
-//      printf("%d.\n", number[0]);
-//      return;
-//   }
-//
-//   if (index_ > 0)
-//   {
-//      if (size + index_ >= capacity)
-//         Expansion();
-//      for (size_t i = size - 1; i > 0; i--)
-//      {
-//         printf("%d %d %d\n", number[i + index_], number[i], i);
-//         number[i + index_] = number[i];
-//         number[i] = 0;
-//         printf("%d %d %d %d\n", size,  i + index_, number[i + index_], number[i]);
-//      }
-//      number[index_] = number[0];
-//      number[0] = 0;
-//
-//      for (size_t i = 0; i < size; i++)
-//         printf("%d ", number[i]);
-//      printf(".\n");
-//
-//   }
-//   else if (index_ < 0)
-//      for (size_t i = size - 1; i >= -index_; i--)
-//         number[i + index_] = number[i];
-//
-//   size += index_;
-//}
 
 
 void BigNumber::Number_Shift(size_t index_)
@@ -288,11 +227,11 @@ ostream& operator<<(ostream& stream, const BigNumber& object_)
 
 istream& operator>>(istream& stream, BigNumber& object_)
 {
-   Nial* reinsurance = new Nial[object_.size];
+   Nial* mercy = new Nial[object_.size];
    for (size_t i = 0; i < object_.size; i++)
-      reinsurance[i] = object_[i];
-   size_t reinsurance_size = object_.size;
-   size_t reinsurance_capacity = object_.capacity;
+      mercy[i] = object_[i];
+   size_t mercy_size = object_.size;
+   size_t mercy_capacity = object_.capacity;
 
    if (object_.size != 0)
       object_.Clear();
@@ -309,21 +248,16 @@ istream& operator>>(istream& stream, BigNumber& object_)
          stream.setstate(ios::badbit);
 
          delete[] object_.number;
-         object_.number = new Nial[reinsurance_capacity];
-         for (size_t i = 0; i < reinsurance_size; i++)
-            object_[i] = reinsurance[i];
+         object_.number = new Nial[mercy_capacity];
+         for (size_t i = 0; i < mercy_size; i++)
+            object_[i] = mercy[i];
          
-         object_.size = reinsurance_size;
-         object_.capacity = reinsurance_capacity;
+         object_.size = mercy_size;
+         object_.capacity = mercy_capacity;
          return stream;
       }
 
       object_.Number_Shift(1);
-
-      //test
-      //for (size_t i = object_.size - 1; i > 0; i--)
-      //   cout << object_[i];
-      //cout << object_[0] << endl;
 
       object_[0] = digit[0] - '0';
    }
