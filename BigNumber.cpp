@@ -279,6 +279,8 @@ istream& operator>>(istream& stream, BigNumber& object_)
          
          object_.size = mercy_size;
          object_.capacity = mercy_capacity;
+         cerr << "Corraption input!";
+         stream.clear();
          return stream;
       }
 
