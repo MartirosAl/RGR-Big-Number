@@ -1,31 +1,60 @@
 #pragma once
 #include <iostream>
+typedef unsigned short int Nial; //Non-negative integers of arbitrary length
 
 using namespace std;
 
 class BigNumber
 {
-   unsigned short int* number;   //Большое число записанное в виде массива целых неотрицательных чисел
+   //Число начинается с ячейки 0, а заканчивается в size - 1
+   //BigNumber 123  ->   [0] = 3   [1] = 2   [2] = 1
+   Nial* number;   //Большое число записанное в виде массива целых неотрицательных чисел
    size_t size;                  //Количество цифр в числе
-   size_t capasity;              //Количество цифр для которых выделена память
+   size_t capacity;              //Количество цифр для которых выделена память
 
 public:
 
-   BigNumber(unsigned short int* number_ = nullptr, size_t size_ = 0);
+   BigNumber(size_t new_cap_);
+
+   BigNumber(Nial* number_, size_t size_);
+
+   ~BigNumber();
 
    BigNumber(const BigNumber& other_);
 
-   unsigned short int& operator[](int index) const;
+   size_t Get_Capacity();
 
-   unsigned short int& operator[](int index);
+   size_t Get_Size();
+
+   Nial& operator[](size_t index_) const;
+
+   Nial& operator[](size_t index_);
 
    BigNumber& operator=(const BigNumber& other_);
 
-   BigNumber& operator+=(const BigNumber& other_) const;
+   BigNumber operator+(const BigNumber& other_) const;
 
-   void Number_Shift(int index);
+   BigNumber& operator+=(const BigNumber& other_);
 
+   //Полное очищение массива
+   void Clear();
+
+   //Сдвиг чисел. Если index_ > 0, до увеличение разрядов на index_, если <, то удаление последних разрядов.
+   //void Number_Shift(int index_);
+
+   void Number_Shift(size_t index_);
+
+
+   //Расширение массива на size + 100
    void Expansion();
 
+   //Расширение массива до new_cap_, если new_cap_ > capasity
+   void Expansion(size_t new_cap_);
+
+   //Вывод должен быть от size - 1 до 0, т.к. конец числа в 0 ячейке, а начало в size - 1
+   // BigNumber 123  ->   [0] = 3   [1] = 2   [2] = 1
+   friend ostream& operator<<(ostream& stream, const BigNumber& object_);
+
+   friend istream& operator>>(istream& stream, BigNumber& object_);
 };
 
