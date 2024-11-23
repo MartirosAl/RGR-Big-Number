@@ -1,6 +1,5 @@
 #pragma once
 #include <iostream>
-typedef unsigned short int Nial; //Non-negative integers of arbitrary length
 
 using namespace std;
 
@@ -8,7 +7,7 @@ class BigNumber
 {
    //Число начинается с ячейки 0, а заканчивается в size - 1
    //BigNumber 123  ->   [0] = 3   [1] = 2   [2] = 1
-   Nial* number;   //Большое число записанное в виде массива целых неотрицательных чисел
+   short* number;   //Большое число записанное в виде массива целых неотрицательных чисел
    size_t size;                  //Количество цифр в числе
    size_t capacity;              //Количество цифр для которых выделена память
 
@@ -16,7 +15,7 @@ public:
 
    BigNumber(size_t new_cap_ = 100);
 
-   BigNumber(const Nial* number_, const size_t size_);
+   BigNumber(const short* number_, const size_t size_);
 
    ~BigNumber();
 
@@ -26,9 +25,9 @@ public:
 
    size_t Get_Size();
 
-   Nial& operator[](size_t index_) const;
+   short& operator[](size_t index_) const;
 
-   Nial& operator[](size_t index_);
+   short& operator[](size_t index_);
 
    BigNumber& operator=(const BigNumber& other_);
 
@@ -36,7 +35,22 @@ public:
 
    BigNumber operator*(BigNumber& other_);
 
+   //Усеченый минус
+   BigNumber operator-(BigNumber& other_);
 
+   BigNumber operator/(BigNumber& other_);
+
+   bool operator<(BigNumber& other_);
+
+   bool operator<=(BigNumber& other_);
+
+   bool operator>(BigNumber& other_);
+
+   bool operator>=(BigNumber& other_);
+
+   bool operator==(BigNumber& other_);
+
+   bool operator!=(BigNumber& other_);
 
    //Полное очищение массива
    void Clear();

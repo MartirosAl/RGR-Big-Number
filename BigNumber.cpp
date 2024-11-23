@@ -2,17 +2,17 @@
 
 BigNumber::BigNumber(size_t new_cap_)
 {
-   number = new Nial[new_cap_];
+   number = new short[new_cap_];
    capacity = new_cap_;
    size = 0;
 }
 
-BigNumber::BigNumber(const Nial* number_, const size_t size_)
+BigNumber::BigNumber(const short* number_, const size_t size_)
 {
    size_t i = 1;
    for (i = 1; 100 * i < size_; i++);
    capacity = 100 * i;
-   number = new Nial[capacity];
+   number = new short[capacity];
    size = size_;
 
    for (i = 0; i < size; i++)
@@ -30,10 +30,9 @@ BigNumber::~BigNumber()
 
 BigNumber::BigNumber(const BigNumber& other_)
 {
-   this->Clear();
    size = other_.size;
    capacity = other_.capacity;
-   number = new Nial[other_.capacity];
+   number = new short[other_.capacity];
    
    for (size_t i = 0; i < other_.size; i++)
       number[i] = other_[i];
@@ -50,14 +49,14 @@ size_t BigNumber::Get_Size()
    return size;
 }
 
-Nial& BigNumber::operator[](size_t index_) const
+short& BigNumber::operator[](size_t index_) const
 {
    if (index_ > capacity)
       throw "Out of range";
    return number[index_];
 }
 
-Nial& BigNumber::operator[](size_t index_) 
+short& BigNumber::operator[](size_t index_) 
 {
    if (index_ > capacity)
       throw "Out of range";
@@ -70,7 +69,7 @@ BigNumber& BigNumber::operator=(const BigNumber& other_)
    {
       this->Clear();
       capacity = other_.capacity;
-      number = new Nial[other_.capacity];
+      number = new short[other_.capacity];
    }
 
    size = other_.size;
@@ -82,82 +81,107 @@ BigNumber& BigNumber::operator=(const BigNumber& other_)
 
 BigNumber BigNumber::operator+(BigNumber& other_) 
 {
-   BigNumber* max_number;
-   BigNumber* min_number;
-   if (size > other_.size)
+   if (size == 0 || other_.size == 0)
    {
-      max_number = this;
-      min_number = &other_;
-   }
-   else
-   {
-      max_number = &other_;
-      min_number = this;
+      BigNumber result(size == 0 ? other_ : *this);
+      return result;
    }
 
-   //Выбираем где больше места, чтобы меньше трогать Expansion
-   BigNumber tempBN(*max_number);
+   BigNumber* max_number = (size > other_.size ? this : &other_);
+   BigNumber* min_number = (size < other_.size ? this : &other_);
 
 
-   Nial adddigit = 0;
+   //Выбираем где больше места + 1, чтобы не трогать Expansion 
+   // //Можно было реализовать и с *max_number, но тогда ножно было бы делать расширение, а это менее эффективно
+   BigNumber result(max_number ->capacity);
+   result.size = max_number->size;
+
+   short adddigit = 0;
 
    for (size_t i = 0; i < min_number->size; i++)
    {
-      tempBN[i] = ((*max_number)[i] + (*min_number)[i] + adddigit) % 10;
+      result[i] = ((*max_number)[i] + (*min_number)[i] + adddigit) % 10;
       adddigit = ((*max_number)[i] + (*min_number)[i] + adddigit) / 10;
-   }
-
-   if (max_number->size == min_number->size)
-   {
-      if (adddigit)
-      {
-         if (size == tempBN.capacity)
-            tempBN.Expansion();
-         tempBN[size] = adddigit;
-
-         tempBN.size++;
-      }
-      return tempBN;
    }
 
    //Смотрим что больше и дополняем до него
    for (size_t i = min_number->size; i < max_number->size; i++)
    {
-      tempBN[i] = (adddigit + (*max_number)[i]) % 10;
+      result[i] = (adddigit + (*max_number)[i]) % 10;
       adddigit = (adddigit + (*max_number)[i]) / 10;
-
    }
 
    if (adddigit)
    {
-      if (max_number->size == tempBN.capacity)
-         tempBN.Expansion();
-      tempBN[max_number->size] = adddigit;
-      tempBN.size++;
+      result[max_number->size] = adddigit;
+      result.size++;
    }
    
-   return tempBN;
+   return result;
 }
 
 BigNumber BigNumber::operator*(BigNumber& other_)
 {
-   BigNumber* tempBN = new BigNumber(size + other_.size);
-   for (size_t i = 0; i < tempBN->capacity; i++)
-      (*tempBN)[i] = 0;
+   BigNumber* result = new BigNumber(size + other_.size);
+   for (size_t i = 0; i < result->capacity; i++)
+      (*result)[i] = 0;
 
    for (size_t i = 0; i < size; i++)
    {
       for (size_t j = 0; j < other_.size; j++)
       {
-         (*tempBN)[i + j] += number[i] * other_[j];
-         (*tempBN)[i + j + 1] += (*tempBN)[i + j] / 10;
-         (*tempBN)[i + j] %= 10;
+         (*result)[i + j] += number[i] * other_[j];
+         (*result)[i + j + 1] += (*result)[i + j] / 10;
+         (*result)[i + j] %= 10;
       }
    }
-   tempBN->size = size + other_.size - 1;
-   if ((*tempBN)[tempBN->size] != 0)
+   result->size = size + other_.size - 1;
+   if ((*result)[result->size] != 0)
       size++;
-   return (*tempBN);
+   return (*result);
+}
+
+BigNumber BigNumber::operator-(BigNumber& other_)
+{
+   if (*this < other_)
+   {
+      BigNumber result(1);
+      result[0] = 0;
+      result.size = 1;
+      return result;
+   }
+   
+   BigNumber* max_number = this;
+   BigNumber* min_number = &other_;
+
+   BigNumber result(*max_number);
+
+   for (size_t i = 0; i < min_number->size; i++)
+   {
+     
+      result[i] = result[i] - (*min_number)[i];
+      result[i + 1] = result[i] < 0 ? result[i + 1] - 1 : result[i + 1];
+      result[i] = result[i] < 0 ? 10 + result[i] : result[i];
+      
+   }
+
+   for (size_t i = size - 1; result[i] == 0 && i > 0; i--)
+      result.size--;
+
+   return result;
+}
+
+bool BigNumber::operator<(BigNumber& other_)
+{
+   if (size != other_.size)
+      return size < other_.size;
+   for (size_t i = size; i > 0; i--)
+   {
+      if (number[i - 1] != other_[i - 1])
+         return number[i - 1] < other_[i - 1];
+   }
+
+   return false;
 }
 
 
@@ -177,7 +201,6 @@ void BigNumber::Number_Shift(size_t index_)
       return;
    while (capacity < size + index_)
       Expansion();
-
    //size_t i = 0 - 1 это очень много
    if (size == 0)
    {
@@ -199,7 +222,7 @@ void BigNumber::Number_Shift(size_t index_)
 
 void BigNumber::Expansion()
 {
-   Nial* temp_arr = new Nial[size];
+   short* temp_arr = new short[size];
 
    for (size_t i = 0; i < size; i++)
       temp_arr[i] = number[i];
@@ -207,7 +230,7 @@ void BigNumber::Expansion()
    if (capacity > 0)
       delete[] number;
    
-   number = new Nial[capacity + 100];
+   number = new short[capacity + 100];
    capacity += 100;
 
    for (size_t i = 0; i < size; i++)
@@ -220,13 +243,13 @@ void BigNumber::Expansion(size_t new_cap_)
    if (new_cap_ <= capacity)
       return;
 
-   Nial* temp_arr = new Nial[size];
+   short* temp_arr = new short[size];
 
    for (size_t i = 0; i < size; i++)
       temp_arr[i] = number[i];
 
    
-   number = new Nial[new_cap_];
+   number = new short[new_cap_];
    capacity = new_cap_;
 
    for (size_t i = 0; i < size; i++)
@@ -251,7 +274,7 @@ ostream& operator<<(ostream& stream, const BigNumber& object_)
 
 istream& operator>>(istream& stream, BigNumber& object_)
 {
-   Nial* mercy = new Nial[object_.size];
+   short* mercy = new short[object_.size];
    for (size_t i = 0; i < object_.size; i++)
       mercy[i] = object_[i];
    size_t mercy_size = object_.size;
@@ -260,7 +283,7 @@ istream& operator>>(istream& stream, BigNumber& object_)
    if (object_.size != 0)
       object_.Clear();
 
-   object_.number = new Nial[100];
+   object_.number = new short[100];
 
    char digit[2];
 
@@ -273,14 +296,13 @@ istream& operator>>(istream& stream, BigNumber& object_)
          stream.setstate(ios::badbit);
 
          delete[] object_.number;
-         object_.number = new Nial[mercy_capacity];
+         object_.number = new short[mercy_capacity];
          for (size_t i = 0; i < mercy_size; i++)
             object_[i] = mercy[i];
          
          object_.size = mercy_size;
          object_.capacity = mercy_capacity;
          cerr << "Corraption input!";
-         stream.clear();
          return stream;
       }
 
