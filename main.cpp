@@ -6,7 +6,7 @@ int main()
 {
    
 
-   //{ 1, 2, 3} ---> [0] = 1, [1] = 2, [3] = 3 ---> 321
+   //{ 1, 2, 3} <---> [0] = 1, [1] = 2, [3] = 3 <---> 321
 
    const size_t size = 3;
    short number[size] = { 9, 1, 2 };
@@ -14,7 +14,7 @@ int main()
 
    const size_t size2 = 3;
    short number2[size2] = { 1, 9, 2};
-   BigNumber object2(number2, size2);
+   BigNumber object2;
 
    cin >> object;
    cin >> object2;
@@ -24,7 +24,7 @@ int main()
 
    
 
-   BigNumber object3(object - object2);
+   BigNumber object3(object % object2);
    cout << object3 << ' ' << object3.Get_Capacity() << ' ' << object3.Get_Size() << endl;
 
 

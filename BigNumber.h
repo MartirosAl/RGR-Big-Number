@@ -39,6 +39,16 @@ public:
 
    short& operator[](size_t index_);
 
+   operator bool() const;
+
+   BigNumber& operator++();
+
+   BigNumber operator++(int);
+
+   BigNumber& operator--();
+
+   BigNumber operator--(int);
+
    BigNumber& operator=(const BigNumber& other_);
 
    BigNumber operator+(BigNumber& other_);
@@ -52,6 +62,8 @@ public:
 
    BigNumber operator%(BigNumber& other_);
 
+   bool operator!();
+
    bool operator<(BigNumber& other_);
 
    bool operator==(BigNumber& other_);
@@ -64,11 +76,39 @@ public:
 
    bool operator!=(BigNumber& other_);
 
+/*   bool operator<(short digit_);
+
+   bool operator==(short digit_);
+
+   bool operator<=(short digit_);
+
+   bool operator>(short digit_);
+
+   bool operator>=(short digit_);
+
+   bool operator!=(short digit_);  */ 
+   
+/*bool operator<(short* digit_);
+
+   bool operator==(short* digit_);
+
+   bool operator<=(short* digit_);
+
+   bool operator>(short* digit_);
+
+   bool operator>=(short* digit_);
+
+   bool operator!=(short* digit_);*/
+
    //Полное очищение массива
    void Clear();
 
    //Сдвиг чисел. Увеличение разрядов на index_
    void Number_Shift(size_t index_);
+
+   void Push_Back(short digit_);
+
+   void Push_Back(short* digit_, size_t size_);
 
    //Расширение массива на capacity + 100
    void Expansion();

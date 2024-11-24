@@ -113,6 +113,73 @@ short& BigNumber::operator[](size_t index_)
    return number[index_];
 }
 
+BigNumber::operator bool() const
+{
+   return (size > 1 || (size == 1 && number[0] != 0));
+}
+
+BigNumber& BigNumber::operator++()
+{
+   if (size == 0)
+   {
+      number = new short[100];
+      size = 1;
+      capacity = 100;
+      number[0] = 1;
+   }
+   short s_one[1] = { 1 };
+   BigNumber one(s_one, 1);
+   (*this) = (*this) + one;
+   return *this;
+}
+
+BigNumber BigNumber::operator++(int)
+{
+   if (size == 0)
+   {
+      number = new short[100];
+      size = 1;
+      capacity = 100;
+      number[0] = 1;
+   }
+   BigNumber temp = (*this);
+   short s_one[1] = { 1 };
+   BigNumber one(s_one, 1);
+   (*this) = (*this) + one;
+   return temp;
+}
+
+BigNumber& BigNumber::operator--()
+{
+   if (size == 0)
+   {
+      number = new short[100];
+      size = 1;
+      capacity = 100;
+      number[0] = 0;
+   }
+   short s_one[1] = { 1 };
+   BigNumber one(s_one, 1);
+   (*this) = (*this) - one;
+   return *this;
+}
+
+BigNumber BigNumber::operator--(int)
+{
+   if (size == 0)
+   {
+      number = new short[100];
+      size = 1;
+      capacity = 100;
+      number[0] = 0;
+   }
+   BigNumber temp = (*this);
+   short s_one[1] = { 1 };
+   BigNumber one(s_one, 1);
+   (*this) = (*this) - one;
+   return temp;
+}
+
 BigNumber& BigNumber::operator=(const BigNumber& other_)
 {
    if (other_.size >= capacity)
@@ -142,12 +209,12 @@ BigNumber BigNumber::operator+(BigNumber& other_)
    }
 
    BigNumber* max_number = (size > other_.size ? this : &other_);
-   BigNumber* min_number = (size < other_.size ? this : &other_);
+   BigNumber* min_number = (size > other_.size ? &other_: this);
 
 
    //Выбираем где больше места + 1, чтобы не трогать Expansion 
-   // //Можно было реализовать и с *max_number, но тогда ножно было бы делать расширение, а это менее эффективно
-   BigNumber result(max_number ->capacity);
+   //Можно было реализовать и с *max_number, но тогда нужно было бы делать расширение, а это менее эффективно
+   BigNumber result((max_number ->capacity) + 1);
    result.size = max_number->size;
 
    short adddigit = 0;
@@ -176,6 +243,13 @@ BigNumber BigNumber::operator+(BigNumber& other_)
 
 BigNumber BigNumber::operator*(BigNumber& other_)
 {
+   if (size == 0 || other_.size == 0)
+   {
+      BigNumber result;
+      result.number[0] = 0;
+      result.size = 1;
+      return result;
+   }
    BigNumber* result = new BigNumber(size + other_.size);
    for (size_t i = 0; i < result->capacity; i++)
       (*result)[i] = 0;
@@ -204,22 +278,45 @@ BigNumber BigNumber::operator-(BigNumber& other_)
       result.size = 1;
       return result;
    }
+
+   if (other_.size == 0 || (other_.size == 1 && other_[0] == 0))
+   {
+      BigNumber result(*this);
+      return result;
+   }
    
    BigNumber* max_number = this;
    BigNumber* min_number = &other_;
-
+   
    BigNumber result(*max_number);
+
+   short subdigit = 0;
 
    for (size_t i = 0; i < min_number->size; i++)
    {
-     
-      result[i] = result[i] - (*min_number)[i];
-      result[i + 1] = result[i] < 0 ? result[i + 1] - 1 : result[i + 1];
-      result[i] = result[i] < 0 ? 10 + result[i] : result[i];
-      
+      result[i] = (*max_number)[i] - (*min_number)[i] - subdigit;
+      if (result[i] < 0)
+      {
+         subdigit = 1;
+         result[i] = 10 + result[i];
+      }
+      else 
+         subdigit = 0;
    }
 
-   for (size_t i = size - 1; result[i] == 0 && i > 0; i--)
+   for (size_t i = min_number->size; i < max_number->size && subdigit; i++)
+   {
+      result[i] = (*max_number)[i] - subdigit;
+      if (result[i] < 0)
+      {
+         subdigit = 1;
+         result[i] = 10 + result[i];
+      }
+      else
+         subdigit = 0;
+   }
+
+   for (size_t i = size - 1; i > 0 && result[i] == 0; i--)
       result.size--;
 
    return result;
@@ -227,7 +324,7 @@ BigNumber BigNumber::operator-(BigNumber& other_)
 
 BigNumber BigNumber::operator/(BigNumber& other_)
 {
-   if (*this < other_)
+   if (*this < other_ || other_.size == 0)
    {
       BigNumber result(1);
       result[0] = 0;
@@ -235,20 +332,23 @@ BigNumber BigNumber::operator/(BigNumber& other_)
       return result;
    }
 
-   BigNumber* max_number = this;
-   BigNumber* min_number = &other_;
-
-   BigNumber result(*max_number);
-
-   for (size_t i = 0; i < size; i++)
+   if (other_.size == 1 && other_.number[0] == 0)
    {
-      for (size_t j = 0; j < other_.size; j++)
-      {
-         ;
-      }
+      throw "You can't divide by zero";
    }
 
-   
+   BigNumber dividend(*this);
+   BigNumber* divider = &other_;
+
+   BigNumber result;
+   result[0] = 0;
+   result.size = 1;
+
+   while (dividend)
+   {
+      result++;
+      dividend = (dividend - (*divider));
+   }
    return result;
 }
 
@@ -262,17 +362,36 @@ BigNumber BigNumber::operator%(BigNumber& other_)
       return result;
    }
 
-   BigNumber* max_number = this;
-   BigNumber* min_number = &other_;
+   BigNumber dividend(*this);
+   BigNumber* divider = &other_;
 
-   BigNumber result(*max_number);
+   BigNumber result;
+   result[0] = 0;
+   result.size = 1;
 
+   BigNumber zero;
+   zero[0] = 0;
+   zero.size = 1;
 
-   return result;
+   while (dividend)
+   {
+      result = dividend;
+      dividend = (dividend - (*divider));
+   }
+
+   return ((result == (*divider)) ? zero : result);
+}
+
+bool BigNumber::operator!()
+{
+   return (!size || (size <= 1 && number[0] == 0));
 }
 
 bool BigNumber::operator<(BigNumber& other_)
 {
+   if (this == &other_)
+      return false;
+
    if (size != other_.size)
       return size < other_.size;
    for (size_t i = size; i > 0; i--)
@@ -286,8 +405,11 @@ bool BigNumber::operator<(BigNumber& other_)
 
 bool BigNumber::operator==(BigNumber& other_)
 {
-   if (size == other_.size)
+   if (this == &other_)
       return true;
+
+   if (size != other_.size)
+      return false;
    for (size_t i = size; i > 0; i--)
    {
       if (number[i - 1] != other_[i - 1])
@@ -299,23 +421,99 @@ bool BigNumber::operator==(BigNumber& other_)
 
 bool BigNumber::operator<=(BigNumber& other_)
 {
-   return (*this) < other_ || (*this) == other_;
+   if (this == &other_)
+      return true;
+
+   if (size != other_.size)
+      return size < other_.size;
+   for (size_t i = size; i > 0; i--)
+   {
+      if (number[i - 1] != other_[i - 1])
+         return number[i - 1] < other_[i - 1];
+   }
+
+   return true;
 }
 
 bool BigNumber::operator>(BigNumber& other_)
 {
-   return !(*this < other_ || *this == other_);
+   if (this == &other_)
+      return false;
+
+   if (size != other_.size)
+      return size > other_.size;
+   for (size_t i = size; i > 0; i--)
+   {
+      if (number[i - 1] != other_[i - 1])
+         return number[i - 1] > other_[i - 1];
+   }
+
+   return false;
 }
 
 bool BigNumber::operator>=(BigNumber& other_)
 {
-   return !(*this < other_);
+   if (this == &other_)
+      return true;
+
+   if (size != other_.size)
+      return size > other_.size;
+   for (size_t i = size; i > 0; i--)
+   {
+      if (number[i - 1] != other_[i - 1])
+         return number[i - 1] > other_[i - 1];
+   }
+
+   return true;
 }
 
 bool BigNumber::operator!=(BigNumber& other_)
 {
    return !(*this == other_);
 }
+
+//bool BigNumber::operator<(short digit_)
+//{
+//   if (digit_ < 0 || digit_ > 9)
+//      throw "Wrong digit";
+//   return (size == 1 && number[0] < digit_);
+//}
+//
+//bool BigNumber::operator==(short digit_)
+//{
+//   if (digit_ < 0 || digit_ > 9)
+//      throw "Wrong digit";
+//   return (size == 1 && number[0] == digit_);
+//}
+//
+//bool BigNumber::operator<=(short digit_)
+//{
+//   if (digit_ < 0 || digit_ > 9)
+//      throw "Wrong digit";
+//   return (size == 1 && number[0] <= digit_);
+//}
+//
+//bool BigNumber::operator>(short digit_)
+//{
+//   if (digit_ < 0 || digit_ > 9)
+//      throw "Wrong digit";
+//   return (size == 1 && number[0] > digit_);
+//}
+//
+//bool BigNumber::operator>=(short digit_)
+//{
+//   if (digit_ < 0 || digit_ > 9)
+//      throw "Wrong digit";
+//   return (size == 1 && number[0] >= digit_);
+//}
+//
+//bool BigNumber::operator!=(short digit_)
+//{
+//   if (digit_ < 0 || digit_ > 9)
+//      throw "Wrong digit";
+//   return (size == 1 && number[0] != digit_);
+//}
+
 
 void BigNumber::Clear()
 {
@@ -348,6 +546,29 @@ void BigNumber::Number_Shift(size_t index_)
    for (size_t i = 0; i < index_; i++)
       number[i] = 0;
    size += index_;
+}
+
+void BigNumber::Push_Back(short digit_)
+{
+   if (digit_ < '0' || digit_ > '9')
+      throw "Wrong digit";
+
+   Number_Shift(1);
+   number[0] = digit_;
+}
+
+void BigNumber::Push_Back(short* digit_, size_t size_)
+{
+   for (size_t i = 0; i < size_; i++)//Итератор
+   {
+      if (digit_[i] < '0' || digit_[i] > '9')
+         throw "Wrong digit";
+   }
+   Number_Shift(size_);
+   for (size_t i = 0; i < size_; i++)
+   {
+      number[i] = digit_[i];
+   }
 }
 
 void BigNumber::Expansion()
