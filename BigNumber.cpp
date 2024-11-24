@@ -362,6 +362,11 @@ BigNumber BigNumber::operator%(BigNumber& other_)
       return result;
    }
 
+   if (other_.size == 1 && other_.number[0] == 0)
+   {
+      throw "You can't divide by zero";
+   }
+
    BigNumber dividend(*this);
    BigNumber* divider = &other_;
 
