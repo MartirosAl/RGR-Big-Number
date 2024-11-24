@@ -1,9 +1,9 @@
 #include "BigNumber.h"
 
-BigNumber::BigNumber(size_t new_cap_)
+BigNumber::BigNumber(size_t new_capacity_)
 {
-   number = new short[new_cap_];
-   capacity = new_cap_;
+   number = new short[new_capacity_];
+   capacity = new_capacity_;
    size = 0;
 }
 
@@ -32,19 +32,69 @@ BigNumber::BigNumber(const BigNumber& other_)
 {
    size = other_.size;
    capacity = other_.capacity;
-   number = new short[other_.capacity];
-   
+   //убрать ошибку С6386 Переполнение буфера при записи в "number".
+   if (other_.size <= other_.capacity)
+      number = new short[other_.capacity];
+   else 
+      number = new short[other_.size];
+
+
    for (size_t i = 0; i < other_.size; i++)
       number[i] = other_[i];
 
 }
 
-size_t BigNumber::Get_Capacity()
+void BigNumber::Set_Number(const short* new_number_)
+{
+   Clear();
+
+   size_t i = 0;
+
+   while (new_number_[i] != '\0')
+   {
+      if (size == capacity)
+         Expansion();
+
+      number[i] = new_number_[i];
+   }
+}
+
+void BigNumber::Set_Number(const short* new_number_, size_t new_size_)
+{
+   if (size != new_size_)
+   {
+      Clear();
+      Expansion(new_size_);
+      size = new_size_;
+   }
+
+   for (size_t i = 0; i < new_size_; i++)
+   {
+      number[i] = new_number_[i];
+   }
+}
+
+void BigNumber::Set_Capacity(const size_t new_capacity_)
+{
+   capacity = new_capacity_;
+}
+
+void BigNumber::Set_Size(const size_t new_size_)
+{
+   size = new_size_;
+}
+
+short* BigNumber::Get_Number() const
+{
+   return number;
+}
+
+size_t BigNumber::Get_Capacity() const
 {
    return capacity;
 }
 
-size_t BigNumber::Get_Size()
+size_t BigNumber::Get_Size() const
 {
    return size;
 }
@@ -69,7 +119,11 @@ BigNumber& BigNumber::operator=(const BigNumber& other_)
    {
       this->Clear();
       capacity = other_.capacity;
-      number = new short[other_.capacity];
+      //убрать ошибку С6386 Переполнение буфера при записи в "number".
+      if (other_.size <= other_.capacity)
+         number = new short[other_.capacity];
+      else
+         number = new short[other_.size];
    }
 
    size = other_.size;
@@ -143,7 +197,7 @@ BigNumber BigNumber::operator*(BigNumber& other_)
 
 BigNumber BigNumber::operator-(BigNumber& other_)
 {
-   if (*this < other_)
+   if (*this <= other_)
    {
       BigNumber result(1);
       result[0] = 0;
@@ -171,6 +225,52 @@ BigNumber BigNumber::operator-(BigNumber& other_)
    return result;
 }
 
+BigNumber BigNumber::operator/(BigNumber& other_)
+{
+   if (*this < other_)
+   {
+      BigNumber result(1);
+      result[0] = 0;
+      result.size = 1;
+      return result;
+   }
+
+   BigNumber* max_number = this;
+   BigNumber* min_number = &other_;
+
+   BigNumber result(*max_number);
+
+   for (size_t i = 0; i < size; i++)
+   {
+      for (size_t j = 0; j < other_.size; j++)
+      {
+         ;
+      }
+   }
+
+   
+   return result;
+}
+
+BigNumber BigNumber::operator%(BigNumber& other_)
+{
+   if (*this < other_)
+   {
+      BigNumber result(1);
+      result[0] = 0;
+      result.size = 1;
+      return result;
+   }
+
+   BigNumber* max_number = this;
+   BigNumber* min_number = &other_;
+
+   BigNumber result(*max_number);
+
+
+   return result;
+}
+
 bool BigNumber::operator<(BigNumber& other_)
 {
    if (size != other_.size)
@@ -184,7 +284,38 @@ bool BigNumber::operator<(BigNumber& other_)
    return false;
 }
 
+bool BigNumber::operator==(BigNumber& other_)
+{
+   if (size == other_.size)
+      return true;
+   for (size_t i = size; i > 0; i--)
+   {
+      if (number[i - 1] != other_[i - 1])
+         return false;
+   }
 
+   return true;
+}
+
+bool BigNumber::operator<=(BigNumber& other_)
+{
+   return (*this) < other_ || (*this) == other_;
+}
+
+bool BigNumber::operator>(BigNumber& other_)
+{
+   return !(*this < other_ || *this == other_);
+}
+
+bool BigNumber::operator>=(BigNumber& other_)
+{
+   return !(*this < other_);
+}
+
+bool BigNumber::operator!=(BigNumber& other_)
+{
+   return !(*this == other_);
+}
 
 void BigNumber::Clear()
 {
@@ -193,7 +324,6 @@ void BigNumber::Clear()
    size = 0;
    capacity = 0;
 }
-
 
 void BigNumber::Number_Shift(size_t index_)
 {
@@ -238,9 +368,9 @@ void BigNumber::Expansion()
    
 }
 
-void BigNumber::Expansion(size_t new_cap_)
+void BigNumber::Expansion(size_t new_capacity_)
 {
-   if (new_cap_ <= capacity)
+   if (new_capacity_ <= capacity)
       return;
 
    short* temp_arr = new short[size];
@@ -249,8 +379,8 @@ void BigNumber::Expansion(size_t new_cap_)
       temp_arr[i] = number[i];
 
    
-   number = new short[new_cap_];
-   capacity = new_cap_;
+   number = new short[new_capacity_];
+   capacity = new_capacity_;
 
    for (size_t i = 0; i < size; i++)
       number[i] = temp_arr[i];
