@@ -1,3 +1,5 @@
+//Вариант #10 неотрицательное целое число произвольной длины реализованых в виде масссива десятичных цифр 
+
 #pragma once
 #include <iostream>
 #include "Iterator.h"
@@ -77,29 +79,6 @@ public:
 
    bool operator!=(BigNumber& other_);
 
-/*   bool operator<(short digit_);
-
-   bool operator==(short digit_);
-
-   bool operator<=(short digit_);
-
-   bool operator>(short digit_);
-
-   bool operator>=(short digit_);
-
-   bool operator!=(short digit_);  */ 
-   
-/*bool operator<(short* digit_);
-
-   bool operator==(short* digit_);
-
-   bool operator<=(short* digit_);
-
-   bool operator>(short* digit_);
-
-   bool operator>=(short* digit_);
-
-   bool operator!=(short* digit_);*/
 
    //Полное очищение массива
    void Clear();

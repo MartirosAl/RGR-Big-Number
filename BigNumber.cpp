@@ -477,49 +477,6 @@ bool BigNumber::operator!=(BigNumber& other_)
    return !(*this == other_);
 }
 
-//bool BigNumber::operator<(short digit_)
-//{
-//   if (digit_ < 0 || digit_ > 9)
-//      throw "Wrong digit";
-//   return (size == 1 && number[0] < digit_);
-//}
-//
-//bool BigNumber::operator==(short digit_)
-//{
-//   if (digit_ < 0 || digit_ > 9)
-//      throw "Wrong digit";
-//   return (size == 1 && number[0] == digit_);
-//}
-//
-//bool BigNumber::operator<=(short digit_)
-//{
-//   if (digit_ < 0 || digit_ > 9)
-//      throw "Wrong digit";
-//   return (size == 1 && number[0] <= digit_);
-//}
-//
-//bool BigNumber::operator>(short digit_)
-//{
-//   if (digit_ < 0 || digit_ > 9)
-//      throw "Wrong digit";
-//   return (size == 1 && number[0] > digit_);
-//}
-//
-//bool BigNumber::operator>=(short digit_)
-//{
-//   if (digit_ < 0 || digit_ > 9)
-//      throw "Wrong digit";
-//   return (size == 1 && number[0] >= digit_);
-//}
-//
-//bool BigNumber::operator!=(short digit_)
-//{
-//   if (digit_ < 0 || digit_ > 9)
-//      throw "Wrong digit";
-//   return (size == 1 && number[0] != digit_);
-//}
-
-
 void BigNumber::Clear()
 {
    delete[] number;
