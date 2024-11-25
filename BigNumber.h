@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include "Iterator.h"
 
 using namespace std;
 
@@ -123,5 +124,16 @@ public:
    //¬вод должен быть от size - 1 до 0, т.к. конец числа в 0 €чейке, а начало в size - 1
    // BigNumber 123  ->   [0] = 3   [1] = 2   [2] = 1
    friend istream& operator>>(istream& stream, BigNumber& object_);
+
+   Iterator begin() const
+   {
+      return Iterator(number);
+   }
+
+   Iterator end() const
+   {
+      return Iterator(nullptr);
+   }
 };
+
 

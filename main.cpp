@@ -23,7 +23,7 @@ int main()
 
 
    
-
+   
    BigNumber object3(object % object2);
    cout << object3 << ' ' << object3.Get_Capacity() << ' ' << object3.Get_Size() << endl;
 
