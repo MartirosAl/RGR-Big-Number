@@ -2,16 +2,22 @@
 class Iterator
 {
    short* arr;
-   size_t index;
 
 public:
 
-   Iterator(short* begin, size_t index_ = 0) : arr(begin), index(index_) {}
+   Iterator(short* begin) : arr(begin) {}
+   const short& operator*() const
+   {
+      if (!arr)
+         throw "There is no pointer";
+      return *arr;
+   }
+
    short& operator*()
    {
       if (!arr)
          throw "There is no pointer";
-      return arr[index];
+      return *arr;
    }
 
    short* operator->()
@@ -21,22 +27,21 @@ public:
       return arr;
    }
 
-   Iterator& operator++()
+   Iterator operator++()
    {
       if (!arr)
          throw "There is no pointer";
-      index++;
-      return *this;
+      return Iterator(arr++);
    }
 
    bool operator==(const Iterator& other_) const
    {
-      return arr[index] == other_.arr[index];
+      return *arr == *other_.arr;
    }
 
    bool operator!=(const Iterator& other_) const
    {
-      return arr[index] != other_.arr[index];
+      return *arr != *other_.arr;
    }
 };
 
