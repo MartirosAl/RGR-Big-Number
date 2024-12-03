@@ -32,7 +32,7 @@ BigNumber::BigNumber(const BigNumber& other_)
 {
    size = other_.size;
    capacity = other_.capacity;
-   //убрать ошибку С6386 Переполнение буфера при записи в "number".
+   //ГіГЎГ°Г ГІГј Г®ГёГЁГЎГЄГі Г‘6386 ГЏГҐГ°ГҐГЇГ®Г«Г­ГҐГ­ГЁГҐ ГЎГіГґГҐГ°Г  ГЇГ°ГЁ Г§Г ГЇГЁГ±ГЁ Гў "number".
    if (other_.size <= other_.capacity)
       number = new short[other_.capacity];
    else 
@@ -186,7 +186,7 @@ BigNumber& BigNumber::operator=(const BigNumber& other_)
    {
       this->Clear();
       capacity = other_.capacity;
-      //убрать ошибку С6386 Переполнение буфера при записи в "number".
+      //ГіГЎГ°Г ГІГј Г®ГёГЁГЎГЄГі Г‘6386 ГЏГҐГ°ГҐГЇГ®Г«Г­ГҐГ­ГЁГҐ ГЎГіГґГҐГ°Г  ГЇГ°ГЁ Г§Г ГЇГЁГ±ГЁ Гў "number".
       if (other_.size <= other_.capacity)
          number = new short[other_.capacity];
       else
@@ -212,8 +212,8 @@ BigNumber BigNumber::operator+(BigNumber& other_)
    BigNumber* min_number = (size > other_.size ? &other_: this);
 
 
-   //Выбираем где больше места + 1, чтобы не трогать Expansion 
-   //Можно было реализовать и с *max_number, но тогда нужно было бы делать расширение, а это менее эффективно
+   //Г‚Г»ГЎГЁГ°Г ГҐГ¬ ГЈГ¤ГҐ ГЎГ®Г«ГјГёГҐ Г¬ГҐГ±ГІГ  + 1, Г·ГІГ®ГЎГ» Г­ГҐ ГІГ°Г®ГЈГ ГІГј Expansion 
+   //ГЊГ®Г¦Г­Г® ГЎГ»Г«Г® Г°ГҐГ Г«ГЁГ§Г®ГўГ ГІГј ГЁ Г± *max_number, Г­Г® ГІГ®ГЈГ¤Г  Г­ГіГ¦Г­Г® ГЎГ»Г«Г® ГЎГ» Г¤ГҐГ«Г ГІГј Г°Г Г±ГёГЁГ°ГҐГ­ГЁГҐ, Г  ГЅГІГ® Г¬ГҐГ­ГҐГҐ ГЅГґГґГҐГЄГІГЁГўГ­Г®
    BigNumber result((max_number ->capacity) + 1);
    result.size = max_number->size;
 
@@ -225,7 +225,7 @@ BigNumber BigNumber::operator+(BigNumber& other_)
       adddigit = ((*max_number)[i] + (*min_number)[i] + adddigit) / 10;
    }
 
-   //Смотрим что больше и дополняем до него
+   //Г‘Г¬Г®ГІГ°ГЁГ¬ Г·ГІГ® ГЎГ®Г«ГјГёГҐ ГЁ Г¤Г®ГЇГ®Г«Г­ГїГҐГ¬ Г¤Г® Г­ГҐГЈГ®
    for (size_t i = min_number->size; i < max_number->size; i++)
    {
       result[i] = (adddigit + (*max_number)[i]) % 10;
@@ -491,7 +491,7 @@ void BigNumber::Number_Shift(size_t index_)
       return;
    while (capacity < size + index_)
       Expansion();
-   //size_t i = 0 - 1 это очень много
+   //size_t i = 0 - 1 ГЅГІГ® Г®Г·ГҐГ­Гј Г¬Г­Г®ГЈГ®
    if (size == 0)
    {
       number[0] = 0;
@@ -499,7 +499,7 @@ void BigNumber::Number_Shift(size_t index_)
       return;
    }
    
-   //Идем от последнего числа
+   //Г€Г¤ГҐГ¬ Г®ГІ ГЇГ®Г±Г«ГҐГ¤Г­ГҐГЈГ® Г·ГЁГ±Г«Г 
    for (size_t i = size - 1; i > 0; i--)
    {
       number[i + index_] = number[i];
@@ -521,7 +521,7 @@ void BigNumber::Push_Back(short digit_)
 
 void BigNumber::Push_Back(short* digit_, size_t size_)
 {
-   for (size_t i = 0; i < size_; i++)//Итератор
+   for (size_t i = 0; i < size_; i++)//Г€ГІГҐГ°Г ГІГ®Г°
    {
       if (digit_[i] < '0' || digit_[i] > '9')
          throw "Wrong digit";
@@ -577,8 +577,8 @@ ostream& operator<<(ostream& stream, const BigNumber& object_)
       {
          stream << object_[i];
       }
-      // Отдельно, т.к. если i >= 0, то тип size_t будет заменять отрицательные числа на 0 
-      // и получится, что 0 - 1 = 0 -> продолжаем цикл
+      // ГЋГІГ¤ГҐГ«ГјГ­Г®, ГІ.ГЄ. ГҐГ±Г«ГЁ i >= 0, ГІГ® ГІГЁГЇ size_t ГЎГіГ¤ГҐГІ Г§Г Г¬ГҐГ­ГїГІГј Г®ГІГ°ГЁГ¶Г ГІГҐГ«ГјГ­Г»ГҐ Г·ГЁГ±Г«Г  Г­Г  0 
+      // ГЁ ГЇГ®Г«ГіГ·ГЁГІГ±Гї, Г·ГІГ® 0 - 1 = 0 -> ГЇГ°Г®Г¤Г®Г«Г¦Г ГҐГ¬ Г¶ГЁГЄГ«
       stream << object_[0];
    }
 
@@ -623,7 +623,7 @@ istream& operator>>(istream& stream, BigNumber& object_)
 
       object_[0] = digit[0] - '0';
    }
-   stream.ignore();//Игнорируем \n
+   stream.ignore();//Г€ГЈГ­Г®Г°ГЁГ°ГіГҐГ¬ \n
 
    return stream;
 }
