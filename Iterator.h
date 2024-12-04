@@ -34,6 +34,16 @@ public:
       return Iterator(arr++);
    }
 
+   Iterator operator++(int)
+   {
+      if (!arr)
+         throw "There is no pointer";
+
+      Iterator temp = (*this);
+      arr++;
+      return Iterator(temp);
+   }
+
    bool operator==(const Iterator& other_) const
    {
       return arr == other_.arr;

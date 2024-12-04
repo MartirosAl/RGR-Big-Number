@@ -647,4 +647,3 @@ istream& operator>>(istream& stream, BigNumber& object_)
    return stream;
 }
 
-
