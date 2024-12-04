@@ -16,7 +16,7 @@ class BigNumber
 
 public:
 
-   BigNumber(size_t new_cap_ = 100);
+   BigNumber(const size_t new_cap_ = 100);
 
    BigNumber(const short* number_, const size_t size_);
 
@@ -24,15 +24,7 @@ public:
 
    BigNumber(const BigNumber& other_);
 
-   void Set_Number(const short* new_number_);
-
    void Set_Number(const short* new_number_, size_t new_size_);
-
-   void Set_Capacity(const size_t new_capacity_);
-
-   void Set_Size(const size_t new_size_);
-
-   short* Get_Number() const;
 
    size_t Get_Capacity() const;
 
@@ -54,30 +46,32 @@ public:
 
    BigNumber& operator=(const BigNumber& other_);
 
-   BigNumber operator+(BigNumber& other_);
+   BigNumber operator+(const BigNumber& other_) const;
 
-   BigNumber operator*(BigNumber& other_);
+   BigNumber operator*(const BigNumber& other_) const;
+
+   BigNumber operator*(const short& digit_) const;
 
    //Усеченый минус
-   BigNumber operator-(BigNumber& other_);
+   BigNumber operator-(const BigNumber& other_) const;
 
-   BigNumber operator/(BigNumber& other_);
+   BigNumber operator/(const BigNumber& other_) const;
 
-   BigNumber operator%(BigNumber& other_);
+   BigNumber operator%(const BigNumber& other_) const;
 
-   bool operator!();
+   bool operator!() const;
 
-   bool operator<(BigNumber& other_);
+   bool operator<(const BigNumber& other_) const;
 
-   bool operator==(BigNumber& other_);
+   bool operator==(const BigNumber& other_) const;
 
-   bool operator<=(BigNumber& other_);
+   bool operator<=(const BigNumber& other_) const;
 
-   bool operator>(BigNumber& other_);
+   bool operator>(const BigNumber& other_) const;
 
-   bool operator>=(BigNumber& other_);
+   bool operator>=(const BigNumber& other_) const;
 
-   bool operator!=(BigNumber& other_);
+   bool operator!=(const BigNumber& other_) const;
 
 
    //Полное очищение массива
@@ -86,11 +80,13 @@ public:
    //Сдвиг чисел. Увеличение разрядов на index_
    void Number_Shift(size_t index_);
 
+   //Вставка цифры в конец числа
    void Push_Back(short digit_);
 
+   //Вставка массива в конец числа
    void Push_Back(short* digit_, size_t size_);
 
-   //Расширение массива на capacity + 100
+   //Расширение массива на capacity * 2
    void Expansion();
 
    //Расширение массива до new_cap_, если new_cap_ > capacity

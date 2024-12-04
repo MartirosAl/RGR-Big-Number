@@ -1,18 +1,21 @@
 #include "BigNumber.h"
 
-BigNumber::BigNumber(size_t new_capacity_)
+BigNumber::BigNumber(const size_t new_capacity_)
 {
    number = new short[new_capacity_];
    capacity = new_capacity_;
-   size = 0;
+   size = 1;
+   number[0] = 0;
 }
 
 BigNumber::BigNumber(const short* number_, const size_t size_)
 {
+   //Выделяю память кратную 100 и больше size_
    size_t i = 1;
    for (i = 1; 100 * i < size_; i++);
    capacity = 100 * i;
    number = new short[capacity];
+
    size = size_;
 
    for (i = 0; i < size; i++)
@@ -30,33 +33,17 @@ BigNumber::~BigNumber()
 
 BigNumber::BigNumber(const BigNumber& other_)
 {
+   if (other_.size == 0)
+      throw "Uninitialized variables";
+
    size = other_.size;
    capacity = other_.capacity;
-   //ГіГЎГ°Г ГІГј Г®ГёГЁГЎГЄГі Г‘6386 ГЏГҐГ°ГҐГЇГ®Г«Г­ГҐГ­ГЁГҐ ГЎГіГґГҐГ°Г  ГЇГ°ГЁ Г§Г ГЇГЁГ±ГЁ Гў "number".
-   if (other_.size <= other_.capacity)
-      number = new short[other_.capacity];
-   else 
-      number = new short[other_.size];
+   number = new short[other_.capacity];
 
 
    for (size_t i = 0; i < other_.size; i++)
       number[i] = other_[i];
 
-}
-
-void BigNumber::Set_Number(const short* new_number_)
-{
-   Clear();
-
-   size_t i = 0;
-
-   while (new_number_[i] != '\0')
-   {
-      if (size == capacity)
-         Expansion();
-
-      number[i] = new_number_[i];
-   }
 }
 
 void BigNumber::Set_Number(const short* new_number_, size_t new_size_)
@@ -69,24 +56,7 @@ void BigNumber::Set_Number(const short* new_number_, size_t new_size_)
    }
 
    for (size_t i = 0; i < new_size_; i++)
-   {
       number[i] = new_number_[i];
-   }
-}
-
-void BigNumber::Set_Capacity(const size_t new_capacity_)
-{
-   capacity = new_capacity_;
-}
-
-void BigNumber::Set_Size(const size_t new_size_)
-{
-   size = new_size_;
-}
-
-short* BigNumber::Get_Number() const
-{
-   return number;
 }
 
 size_t BigNumber::Get_Capacity() const
@@ -101,14 +71,20 @@ size_t BigNumber::Get_Size() const
 
 short& BigNumber::operator[](size_t index_) const
 {
-   if (index_ > capacity)
+   if (size == 0)
+      throw "Uninitialized variables";
+
+   if (index_ >= size || index_ >= capacity)
       throw "Out of range";
    return number[index_];
 }
 
 short& BigNumber::operator[](size_t index_) 
 {
-   if (index_ > capacity)
+   if (size == 0)
+      throw "Uninitialized variables";
+
+   if (index_ >= size || index_ >= capacity)
       throw "Out of range";
    return number[index_];
 }
@@ -121,12 +97,8 @@ BigNumber::operator bool() const
 BigNumber& BigNumber::operator++()
 {
    if (size == 0)
-   {
-      number = new short[100];
-      size = 1;
-      capacity = 100;
-      number[0] = 1;
-   }
+      throw "Uninitialized variables";
+
    short s_one[1] = { 1 };
    BigNumber one(s_one, 1);
    (*this) = (*this) + one;
@@ -136,12 +108,8 @@ BigNumber& BigNumber::operator++()
 BigNumber BigNumber::operator++(int)
 {
    if (size == 0)
-   {
-      number = new short[100];
-      size = 1;
-      capacity = 100;
-      number[0] = 1;
-   }
+      throw "Uninitialized variables";
+
    BigNumber temp = (*this);
    short s_one[1] = { 1 };
    BigNumber one(s_one, 1);
@@ -152,12 +120,8 @@ BigNumber BigNumber::operator++(int)
 BigNumber& BigNumber::operator--()
 {
    if (size == 0)
-   {
-      number = new short[100];
-      size = 1;
-      capacity = 100;
-      number[0] = 0;
-   }
+      throw "Uninitialized variables";
+
    short s_one[1] = { 1 };
    BigNumber one(s_one, 1);
    (*this) = (*this) - one;
@@ -167,12 +131,8 @@ BigNumber& BigNumber::operator--()
 BigNumber BigNumber::operator--(int)
 {
    if (size == 0)
-   {
-      number = new short[100];
-      size = 1;
-      capacity = 100;
-      number[0] = 0;
-   }
+      throw "Uninitialized variables";
+
    BigNumber temp = (*this);
    short s_one[1] = { 1 };
    BigNumber one(s_one, 1);
@@ -182,15 +142,14 @@ BigNumber BigNumber::operator--(int)
 
 BigNumber& BigNumber::operator=(const BigNumber& other_)
 {
+   if (other_.size == 0)
+      throw "Uninitialized variables";
+
    if (other_.size >= capacity)
    {
       this->Clear();
       capacity = other_.capacity;
-      //ГіГЎГ°Г ГІГј Г®ГёГЁГЎГЄГі Г‘6386 ГЏГҐГ°ГҐГЇГ®Г«Г­ГҐГ­ГЁГҐ ГЎГіГґГҐГ°Г  ГЇГ°ГЁ Г§Г ГЇГЁГ±ГЁ Гў "number".
-      if (other_.size <= other_.capacity)
-         number = new short[other_.capacity];
-      else
-         number = new short[other_.size];
+      number = new short[other_.capacity];
    }
 
    size = other_.size;
@@ -200,101 +159,135 @@ BigNumber& BigNumber::operator=(const BigNumber& other_)
    return *this;
 }
 
-BigNumber BigNumber::operator+(BigNumber& other_) 
+BigNumber BigNumber::operator+(const BigNumber& other_) const
 {
-   if (size == 0 || other_.size == 0)
-   {
-      BigNumber result(size == 0 ? other_ : *this);
-      return result;
-   }
+   if (other_.size == 0 || size == 0)
+      throw "Uninitialized variables";
 
-   BigNumber* max_number = (size > other_.size ? this : &other_);
-   BigNumber* min_number = (size > other_.size ? &other_: this);
+   BigNumber max_number = (size > other_.size ? *this : other_);
+   BigNumber min_number = (size > other_.size ? other_ : *this);
 
 
-   //Г‚Г»ГЎГЁГ°Г ГҐГ¬ ГЈГ¤ГҐ ГЎГ®Г«ГјГёГҐ Г¬ГҐГ±ГІГ  + 1, Г·ГІГ®ГЎГ» Г­ГҐ ГІГ°Г®ГЈГ ГІГј Expansion 
-   //ГЊГ®Г¦Г­Г® ГЎГ»Г«Г® Г°ГҐГ Г«ГЁГ§Г®ГўГ ГІГј ГЁ Г± *max_number, Г­Г® ГІГ®ГЈГ¤Г  Г­ГіГ¦Г­Г® ГЎГ»Г«Г® ГЎГ» Г¤ГҐГ«Г ГІГј Г°Г Г±ГёГЁГ°ГҐГ­ГЁГҐ, Г  ГЅГІГ® Г¬ГҐГ­ГҐГҐ ГЅГґГґГҐГЄГІГЁГўГ­Г®
-   BigNumber result((max_number ->capacity) + 1);
-   result.size = max_number->size;
+   //Выбираем где больше места + 1, чтобы не трогать Expansion 
+   //Можно было реализовать и с *max_number, но тогда нужно было бы делать расширение, а это менее эффективно
+   BigNumber result((max_number.capacity) + 1);
+   result.size = max_number.size;
 
    short adddigit = 0;
 
-   for (size_t i = 0; i < min_number->size; i++)
+   for (size_t i = 0; i < min_number.size; i++)
    {
-      result[i] = ((*max_number)[i] + (*min_number)[i] + adddigit) % 10;
-      adddigit = ((*max_number)[i] + (*min_number)[i] + adddigit) / 10;
+      result[i] = (max_number[i] + min_number[i] + adddigit) % 10;
+      adddigit = (max_number[i] + min_number[i] + adddigit) / 10;
    }
 
-   //Г‘Г¬Г®ГІГ°ГЁГ¬ Г·ГІГ® ГЎГ®Г«ГјГёГҐ ГЁ Г¤Г®ГЇГ®Г«Г­ГїГҐГ¬ Г¤Г® Г­ГҐГЈГ®
-   for (size_t i = min_number->size; i < max_number->size; i++)
+   //Смотрим что больше и дополняем до него
+   for (size_t i = min_number.size; i < max_number.size; i++)
    {
-      result[i] = (adddigit + (*max_number)[i]) % 10;
-      adddigit = (adddigit + (*max_number)[i]) / 10;
+      result[i] = (adddigit + max_number[i]) % 10;
+      adddigit = (adddigit + max_number[i]) / 10;
    }
 
    if (adddigit)
    {
-      result[max_number->size] = adddigit;
       result.size++;
+      result[result.size - 1] = adddigit;
    }
    
    return result;
 }
 
-BigNumber BigNumber::operator*(BigNumber& other_)
+BigNumber BigNumber::operator*(const short& digit_) const
 {
-   if (size == 0 || other_.size == 0)
+   if (size == 0)
+      throw "Uninitialized variables";
+
+   if (digit_ > 9 || digit_ < 0)
+      throw "Wrong variable";
+
+   if (size == 1 && number[0] == 0 || digit_ == 0)
+      return BigNumber();
+
+   BigNumber result(size + 1);
+   result.size = size;
+
+   short digit = 0;
+
+   for (size_t i = 0; i < size; i++)
    {
-      BigNumber result;
-      result.number[0] = 0;
-      result.size = 1;
-      return result;
+      digit += number[i] * digit_;
+      result[i] = digit % 10;
+      digit = digit / 10;
    }
-   BigNumber* result = new BigNumber(size + other_.size);
-   for (size_t i = 0; i < result->capacity; i++)
-      (*result)[i] = 0;
+
+   if (digit != 0)
+   {
+      result.size++;
+      result[result.size - 1] = digit;
+   }
+
+   return result;
+}
+
+BigNumber BigNumber::operator*(const BigNumber& other_) const
+{
+   if (other_.size == 0 || size == 0)
+      throw "Uninitialized variables";
+
+   if (size == 1 && number[0] == 0 || other_.size == 1 && other_[0] == 0)
+      return BigNumber();
+
+   BigNumber result(size + other_.size + 1);
+   result.size = (size > other_.size ? size : other_.size);
+
+   short digit = 0;
 
    for (size_t i = 0; i < size; i++)
    {
       for (size_t j = 0; j < other_.size; j++)
       {
-         (*result)[i + j] += number[i] * other_[j];
-         (*result)[i + j + 1] += (*result)[i + j] / 10;
-         (*result)[i + j] %= 10;
+         digit += number[i] * other_[j];
+         result[i + j] = digit % 10;
+         digit = digit / 10;
       }
    }
-   result->size = size + other_.size - 1;
-   if ((*result)[result->size] != 0)
-      size++;
-   return (*result);
+
+   if (digit != 0)
+   {
+      result.size++;
+      result[result.size - 1] = digit;
+   }
+
+   return result;
 }
 
-BigNumber BigNumber::operator-(BigNumber& other_)
+
+BigNumber BigNumber::operator-(const BigNumber& other_) const
 {
+   if (other_.size == 0 || size == 0)
+      throw "Uninitialized variables";
+
    if (*this <= other_)
    {
       BigNumber result(1);
-      result[0] = 0;
       result.size = 1;
+      result[0] = 0;
       return result;
    }
 
-   if (other_.size == 0 || (other_.size == 1 && other_[0] == 0))
-   {
-      BigNumber result(*this);
-      return result;
-   }
+   if (other_.size == 1 && other_[0] == 0)
+      return *this;
    
-   BigNumber* max_number = this;
-   BigNumber* min_number = &other_;
+   BigNumber max_number = *this;
+   BigNumber min_number = other_;
    
-   BigNumber result(*max_number);
+   BigNumber result = *this;
 
    short subdigit = 0;
 
-   for (size_t i = 0; i < min_number->size; i++)
+   for (size_t i = 0; i < min_number.size; i++)
    {
-      result[i] = (*max_number)[i] - (*min_number)[i] - subdigit;
+      result[i] = max_number[i] - min_number[i] - subdigit;
       if (result[i] < 0)
       {
          subdigit = 1;
@@ -304,9 +297,9 @@ BigNumber BigNumber::operator-(BigNumber& other_)
          subdigit = 0;
    }
 
-   for (size_t i = min_number->size; i < max_number->size && subdigit; i++)
+   for (size_t i = min_number.size; i < max_number.size && subdigit; i++)
    {
-      result[i] = (*max_number)[i] - subdigit;
+      result[i] = max_number[i] - subdigit;
       if (result[i] < 0)
       {
          subdigit = 1;
@@ -316,163 +309,196 @@ BigNumber BigNumber::operator-(BigNumber& other_)
          subdigit = 0;
    }
 
-   for (size_t i = size - 1; i > 0 && result[i] == 0; i--)
+   for (size_t i = result.size; i > 1 && result[i - 1] == 0; i--)
       result.size--;
 
    return result;
 }
 
-BigNumber BigNumber::operator/(BigNumber& other_)
-{
-   if (*this < other_ || other_.size == 0)
+BigNumber BigNumber::operator/(const BigNumber& other_) const 
+{   
+   if (other_.size == 0 || size == 0)
+      throw "Uninitialized variables";
+
+   if (other_.size == 1 && other_.number[0] == 0)
+      throw "You can't divide by zero";
+
+   if (*this <= other_)
    {
       BigNumber result(1);
-      result[0] = 0;
-      result.size = 1;
       return result;
    }
 
-   if (other_.size == 1 && other_.number[0] == 0)
+   if (other_.size == 1 && other_[0] == 1) 
+      return *this;  
+
+   BigNumber cur(1);
+   BigNumber result(*this);
+
+   for (size_t i = size; i > 0; i--)
    {
-      throw "You can't divide by zero";
+      cur.Push_Back(number[i - 1]);
+      
+      short x = 0;
+      short left = 0;
+      short right = 9;
+      while (left <= right)
+      {
+         short middle = (left + right) / 2;
+
+         if (other_ * middle <= cur)
+         {
+            x = middle;
+            left = middle + 1;
+         }
+         else
+            right = middle - 1;
+      }
+
+      result[i - 1] = x;
+      
+      cur = (cur - (other_ * x));
    }
+   
+   size_t temp = result.size;
+   for (; temp > 1 && result[temp - 1] == 0; temp--);
+   result.size = temp;
 
-   BigNumber dividend(*this);
-   BigNumber* divider = &other_;
-
-   BigNumber result;
-   result[0] = 0;
-   result.size = 1;
-
-   while (dividend)
-   {
-      result++;
-      dividend = (dividend - (*divider));
-   }
    return result;
 }
 
-BigNumber BigNumber::operator%(BigNumber& other_)
+BigNumber BigNumber::operator%(const BigNumber& other_) const
 {
-   if (*this < other_)
+   if (other_.size == 0 || size == 0)
+      throw "Uninitialized variables";
+
+   if (other_.size == 1 && other_.number[0] == 0)
+      throw "You can't divide by zero";
+
+   if (*this <= other_)
    {
       BigNumber result(1);
-      result[0] = 0;
-      result.size = 1;
       return result;
    }
 
-   if (other_.size == 1 && other_.number[0] == 0)
+   if (other_.size == 1 && other_[0] == 1)
    {
-      throw "You can't divide by zero";
+      BigNumber result(1);
+      return result;
    }
 
-   BigNumber dividend(*this);
-   BigNumber* divider = &other_;
+   BigNumber cur(1);
 
-   BigNumber result;
-   result[0] = 0;
-   result.size = 1;
+   BigNumber result(*this);
 
-   BigNumber zero;
-   zero[0] = 0;
-   zero.size = 1;
-
-   while (dividend)
+   for (size_t i = size; i > 0; i--)
    {
-      result = dividend;
-      dividend = (dividend - (*divider));
+      cur.Push_Back(number[i - 1]);
+
+      short x = 0;
+      short left = 0;
+      short right = 9;
+      while (left <= right)
+      {
+         short middle = (left + right) / 2;
+
+         if (other_ * middle <= cur)
+         {
+            x = middle;
+            left = middle + 1;
+         }
+         else
+            right = middle - 1;
+      }
+
+      result[i - 1] = x;
+      cur = (cur - (other_ * x));
    }
 
-   return ((result == (*divider)) ? zero : result);
+   return cur;
 }
 
-bool BigNumber::operator!()
+bool BigNumber::operator!() const
 {
    return (!size || (size <= 1 && number[0] == 0));
 }
 
-bool BigNumber::operator<(BigNumber& other_)
+bool BigNumber::operator<(const BigNumber& other_) const
 {
    if (this == &other_)
       return false;
 
    if (size != other_.size)
       return size < other_.size;
+
    for (size_t i = size; i > 0; i--)
-   {
       if (number[i - 1] != other_[i - 1])
          return number[i - 1] < other_[i - 1];
-   }
 
    return false;
 }
 
-bool BigNumber::operator==(BigNumber& other_)
+bool BigNumber::operator==(const BigNumber& other_) const
 {
    if (this == &other_)
       return true;
 
    if (size != other_.size)
       return false;
+
    for (size_t i = size; i > 0; i--)
-   {
       if (number[i - 1] != other_[i - 1])
          return false;
-   }
 
    return true;
 }
 
-bool BigNumber::operator<=(BigNumber& other_)
+bool BigNumber::operator<=(const BigNumber& other_) const
 {
    if (this == &other_)
       return true;
 
    if (size != other_.size)
       return size < other_.size;
+
    for (size_t i = size; i > 0; i--)
-   {
       if (number[i - 1] != other_[i - 1])
          return number[i - 1] < other_[i - 1];
-   }
 
    return true;
 }
 
-bool BigNumber::operator>(BigNumber& other_)
+bool BigNumber::operator>(const BigNumber& other_) const
 {
    if (this == &other_)
       return false;
 
    if (size != other_.size)
       return size > other_.size;
+
    for (size_t i = size; i > 0; i--)
-   {
       if (number[i - 1] != other_[i - 1])
          return number[i - 1] > other_[i - 1];
-   }
 
    return false;
 }
 
-bool BigNumber::operator>=(BigNumber& other_)
+bool BigNumber::operator>=(const BigNumber& other_) const
 {
    if (this == &other_)
       return true;
 
    if (size != other_.size)
       return size > other_.size;
+
    for (size_t i = size; i > 0; i--)
-   {
       if (number[i - 1] != other_[i - 1])
          return number[i - 1] > other_[i - 1];
-   }
 
    return true;
 }
 
-bool BigNumber::operator!=(BigNumber& other_)
+bool BigNumber::operator!=(const BigNumber& other_) const
 {
    return !(*this == other_);
 }
@@ -485,34 +511,31 @@ void BigNumber::Clear()
    capacity = 0;
 }
 
-void BigNumber::Number_Shift(size_t index_)
+void BigNumber::Number_Shift(const size_t index_)
 {
    if (index_ == 0)
       return;
-   while (capacity < size + index_)
-      Expansion();
-   //size_t i = 0 - 1 ГЅГІГ® Г®Г·ГҐГ­Гј Г¬Г­Г®ГЈГ®
-   if (size == 0)
-   {
-      number[0] = 0;
-      size++;
-      return;
-   }
+
+   if (capacity < size + index_)
+      Expansion(size + index_ + 1);
    
-   //Г€Г¤ГҐГ¬ Г®ГІ ГЇГ®Г±Г«ГҐГ¤Г­ГҐГЈГ® Г·ГЁГ±Г«Г 
-   for (size_t i = size - 1; i > 0; i--)
-   {
-      number[i + index_] = number[i];
-   }
-   number[index_] = number[0];
+
+   for (size_t i = size; i > 0; i--)
+      number[i + index_ - 1] = number[i - 1];
+
    for (size_t i = 0; i < index_; i++)
       number[i] = 0;
+
    size += index_;
+
+   //Удаление лишних нулей, например, если был только один ноль
+   for (size_t i = size; i > 1 && number[i - 1] == 0; i--)
+      size--;
 }
 
 void BigNumber::Push_Back(short digit_)
 {
-   if (digit_ < '0' || digit_ > '9')
+   if (digit_ < 0 || digit_ > 9)
       throw "Wrong digit";
 
    Number_Shift(1);
@@ -521,34 +544,36 @@ void BigNumber::Push_Back(short digit_)
 
 void BigNumber::Push_Back(short* digit_, size_t size_)
 {
-   for (size_t i = 0; i < size_; i++)//Г€ГІГҐГ°Г ГІГ®Г°
-   {
-      if (digit_[i] < '0' || digit_[i] > '9')
-         throw "Wrong digit";
-   }
-   Number_Shift(size_);
+   //Проверка массива на правильность содержания цифр
    for (size_t i = 0; i < size_; i++)
-   {
+      if (digit_[i] < 0 || digit_[i] > 9)
+         throw "Wrong digit";
+
+   Number_Shift(size_);
+
+   for (size_t i = 0; i < size_; i++)
       number[i] = digit_[i];
-   }
+   
 }
 
 void BigNumber::Expansion()
 {
    short* temp_arr = new short[size];
 
-   for (size_t i = 0; i < size; i++)
-      temp_arr[i] = number[i];
-
    if (capacity > 0)
+   {
+      for (size_t i = 0; i < size; i++)
+         temp_arr[i] = number[i];
       delete[] number;
+   }
    
-   number = new short[capacity + 100];
-   capacity += 100;
+   number = new short[capacity * 2];
+   capacity *= 2;
 
    for (size_t i = 0; i < size; i++)
       number[i] = temp_arr[i];
    
+   delete[] temp_arr;
 }
 
 void BigNumber::Expansion(size_t new_capacity_)
@@ -567,26 +592,21 @@ void BigNumber::Expansion(size_t new_capacity_)
 
    for (size_t i = 0; i < size; i++)
       number[i] = temp_arr[i];
+
+   delete[] temp_arr;
 }
 
 ostream& operator<<(ostream& stream, const BigNumber& object_)
 {
-   if (object_.size > 0)
-   {
-      for (size_t i = object_.size - 1; i > 0; i--)
-      {
-         stream << object_[i];
-      }
-      // ГЋГІГ¤ГҐГ«ГјГ­Г®, ГІ.ГЄ. ГҐГ±Г«ГЁ i >= 0, ГІГ® ГІГЁГЇ size_t ГЎГіГ¤ГҐГІ Г§Г Г¬ГҐГ­ГїГІГј Г®ГІГ°ГЁГ¶Г ГІГҐГ«ГјГ­Г»ГҐ Г·ГЁГ±Г«Г  Г­Г  0 
-      // ГЁ ГЇГ®Г«ГіГ·ГЁГІГ±Гї, Г·ГІГ® 0 - 1 = 0 -> ГЇГ°Г®Г¤Г®Г«Г¦Г ГҐГ¬ Г¶ГЁГЄГ«
-      stream << object_[0];
-   }
+   for (size_t i = object_.size; i > 0; i--)
+      stream << object_[i-1];
 
    return stream;
 }
 
 istream& operator>>(istream& stream, BigNumber& object_)
 {
+   //Переременная для востановления первоначального массива в случае неправильного ввода
    short* mercy = new short[object_.size];
    for (size_t i = 0; i < object_.size; i++)
       mercy[i] = object_[i];
@@ -600,13 +620,13 @@ istream& operator>>(istream& stream, BigNumber& object_)
 
    char digit[2];
 
-   while (stream.peek() != '\n')
+   while (stream.peek() != '\n' && stream.peek() != ' ')
    {
       stream.get(digit, 2);
       if (digit[0] < '0' || digit[0] > '9')
       {
          stream.clear();
-         stream.setstate(ios::badbit);
+         stream.setstate(ios::failbit);
 
          delete[] object_.number;
          object_.number = new short[mercy_capacity];
@@ -615,16 +635,15 @@ istream& operator>>(istream& stream, BigNumber& object_)
          
          object_.size = mercy_size;
          object_.capacity = mercy_capacity;
-         cerr << "Corraption input!";
+         cerr << "Corruption input!";
          return stream;
       }
 
-      object_.Number_Shift(1);
-
-      object_[0] = digit[0] - '0';
+      object_.Push_Back(digit[0] - '0');
    }
-   stream.ignore();//Г€ГЈГ­Г®Г°ГЁГ°ГіГҐГ¬ \n
+   stream.ignore();//Игнорируем \n или пробел
 
+   delete[] mercy;
    return stream;
 }
 

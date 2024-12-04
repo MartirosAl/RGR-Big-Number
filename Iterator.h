@@ -36,12 +36,12 @@ public:
 
    bool operator==(const Iterator& other_) const
    {
-      return *arr == *other_.arr;
+      return arr == other_.arr;
    }
 
    bool operator!=(const Iterator& other_) const
    {
-      return *arr != *other_.arr;
+      return arr != other_.arr;
    }
 };
 
