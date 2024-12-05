@@ -238,24 +238,26 @@ BigNumber BigNumber::operator*(const BigNumber& other_) const
       return BigNumber();
 
    BigNumber result(size + other_.size + 1);
-   result.size = (size > other_.size ? size : other_.size);
+   result.size = size + other_.size - 1;
+   for (size_t i = 0; i < size + other_.size - 1; i++)
+      result[i] = 0;
 
-   short digit = 0;
 
    for (size_t i = 0; i < size; i++)
-   {
+   { 
+      short digit = 0;
       for (size_t j = 0; j < other_.size; j++)
       {
-         digit += number[i] * other_[j];
-         result[i + j] = digit % 10;
-         digit = digit / 10;
+         result[i + j] += number[i] * other_[j] + digit;
+         digit = result[i + j] / 10;
+         result[i+j] -= digit * 10;
       }
-   }
-
-   if (digit != 0)
-   {
-      result.size++;
-      result[result.size - 1] = digit;
+      if (digit)
+      {
+         if (result.size <= i + other_.size)
+            result.size++;
+         result[i + other_.size] = digit;
+      }
    }
 
    return result;
@@ -517,7 +519,7 @@ void BigNumber::Number_Shift(const size_t index_)
       return;
 
    if (capacity < size + index_)
-      Expansion(size + index_ + 1);
+      Expansion();
    
 
    for (size_t i = size; i > 0; i--)
@@ -558,7 +560,7 @@ void BigNumber::Push_Back(short* digit_, size_t size_)
 
 void BigNumber::Expansion()
 {
-   short* temp_arr = new short[size];
+   short* temp_arr = new short[capacity *= 2];
 
    if (capacity > 0)
    {
@@ -567,13 +569,8 @@ void BigNumber::Expansion()
       delete[] number;
    }
    
-   number = new short[capacity * 2];
-   capacity *= 2;
+   number = temp_arr;
 
-   for (size_t i = 0; i < size; i++)
-      number[i] = temp_arr[i];
-   
-   delete[] temp_arr;
 }
 
 void BigNumber::Expansion(size_t new_capacity_)
@@ -581,19 +578,15 @@ void BigNumber::Expansion(size_t new_capacity_)
    if (new_capacity_ <= capacity)
       return;
 
-   short* temp_arr = new short[size];
+   short* temp_arr = new short[capacity = new_capacity_];
 
    for (size_t i = 0; i < size; i++)
       temp_arr[i] = number[i];
 
-   
-   number = new short[new_capacity_];
-   capacity = new_capacity_;
+   delete[] number;
+  
+   number = temp_arr;
 
-   for (size_t i = 0; i < size; i++)
-      number[i] = temp_arr[i];
-
-   delete[] temp_arr;
 }
 
 ostream& operator<<(ostream& stream, const BigNumber& object_)
@@ -607,16 +600,13 @@ ostream& operator<<(ostream& stream, const BigNumber& object_)
 istream& operator>>(istream& stream, BigNumber& object_)
 {
    //Переременная для востановления первоначального массива в случае неправильного ввода
-   short* mercy = new short[object_.size];
-   for (size_t i = 0; i < object_.size; i++)
-      mercy[i] = object_[i];
-   size_t mercy_size = object_.size;
-   size_t mercy_capacity = object_.capacity;
+   BigNumber mercy = object_;
 
    if (object_.size != 0)
       object_.Clear();
 
    object_.number = new short[100];
+   object_.capacity = 100;
 
    char digit[2];
 
@@ -628,13 +618,7 @@ istream& operator>>(istream& stream, BigNumber& object_)
          stream.clear();
          stream.setstate(ios::failbit);
 
-         delete[] object_.number;
-         object_.number = new short[mercy_capacity];
-         for (size_t i = 0; i < mercy_size; i++)
-            object_[i] = mercy[i];
-         
-         object_.size = mercy_size;
-         object_.capacity = mercy_capacity;
+         object_ = mercy;
          cerr << "Corruption input!";
          return stream;
       }
@@ -643,7 +627,6 @@ istream& operator>>(istream& stream, BigNumber& object_)
    }
    stream.ignore();//Игнорируем \n или пробел
 
-   delete[] mercy;
    return stream;
 }
 

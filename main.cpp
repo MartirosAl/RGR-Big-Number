@@ -10,11 +10,11 @@ int main()
 
    //const size_t size = 3;
    //short number[size] = { 9, 1, 2 };
-   BigNumber object;
+   BigNumber object(2);
 
    //const size_t size2 = 3;
    //short number2[size2] = { 1, 9, 2};
-   BigNumber object2;
+   BigNumber object2(2);
    BigNumber object3;
 
          
@@ -27,7 +27,7 @@ int main()
 
 
 
-      object3 = object + object2;
+      object3 = object * object2;
       cout << object3 << ' ' << object3.Get_Capacity() << ' ' << object3.Get_Size() << endl << endl;
       //object = object - object2;
    }
