@@ -161,7 +161,7 @@ void Expansion(T*& array)
    array = temp;
 }
 
-//Процедура ДОБАВИТЬ_КОНСТАНТУ
+//РџСЂРѕС†РµРґСѓСЂР° Р”РћР‘РђР’РРўР¬_РљРћРќРЎРўРђРќРўРЈ
 void Add_Constant(bool flag_constant, int*& table_constants, int register_number, int*& register_indicator)
 {
    if (flag_constant == 0)
@@ -183,7 +183,7 @@ void Add_Constant(bool flag_constant, int*& table_constants, int register_number
    register_indicator = &table_constants[sizeof(table_constants) / sizeof(int)];
 }
 
-//Процедура СОЗДАТЬ_ЛЕКСЕМУ
+//РџСЂРѕС†РµРґСѓСЂР° РЎРћР—Р”РђРўР¬_Р›Р•РљРЎР•РњРЈ
 void Create_Token(TokenType register_type_token, int* register_indicator, int register_value, int register_relationship, int number_line)
 {
    SymbolicToken result;
@@ -198,41 +198,41 @@ void Lexical_Analyzer(const char* filename)
    ifstream file(filename);
    if (!file)
    {
-      cout << "Не удалось открыть файл " << filename << endl;
+      cout << "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» " << filename << endl;
       return;
    }
 
-   //Таблица констант для вывода
+   //РўР°Р±Р»РёС†Р° РєРѕРЅСЃС‚Р°РЅС‚ РґР»СЏ РІС‹РІРѕРґР°
    int* table_constants = nullptr;
 
-   //Регистр класса служит для хранения класса лексемы
+   //Р РµРіРёСЃС‚СЂ РєР»Р°СЃСЃР° СЃР»СѓР¶РёС‚ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РєР»Р°СЃСЃР° Р»РµРєСЃРµРјС‹
    TokenType register_type_token;
 
-   //Регистр указателя содержит указатель на таблицу имён для лексем PUSH и POP
+   //Р РµРіРёСЃС‚СЂ СѓРєР°Р·Р°С‚РµР»СЏ СЃРѕРґРµСЂР¶РёС‚ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° С‚Р°Р±Р»РёС†Сѓ РёРјС‘РЅ РґР»СЏ Р»РµРєСЃРµРј PUSH Рё POP
    int* register_indicator = nullptr;
 
-   //Регистр числа используется для вычисления констант
+   //Р РµРіРёСЃС‚СЂ С‡РёСЃР»Р° РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РІС‹С‡РёСЃР»РµРЅРёСЏ РєРѕРЅСЃС‚Р°РЅС‚
    int register_number;
 
-   //Регистр отношения хранит информацию о первом символе отношения
+   //Р РµРіРёСЃС‚СЂ РѕС‚РЅРѕС€РµРЅРёСЏ С…СЂР°РЅРёС‚ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїРµСЂРІРѕРј СЃРёРјРІРѕР»Рµ РѕС‚РЅРѕС€РµРЅРёСЏ
    int register_relationship;
 
-   //Регистр переменной накапливает имя переменной
+   //Р РµРіРёСЃС‚СЂ РїРµСЂРµРјРµРЅРЅРѕР№ РЅР°РєР°РїР»РёРІР°РµС‚ РёРјСЏ РїРµСЂРµРјРµРЅРЅРѕР№
    string register_variable;
 
-   //Регистр обнаружения хранит номер позиции в таблице обнаружения для поиска ключевых слов
+   //Р РµРіРёСЃС‚СЂ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ С…СЂР°РЅРёС‚ РЅРѕРјРµСЂ РїРѕР·РёС†РёРё РІ С‚Р°Р±Р»РёС†Рµ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ РґР»СЏ РїРѕРёСЃРєР° РєР»СЋС‡РµРІС‹С… СЃР»РѕРІ
    int register_detection;
 
-   //Регистр значения хранит значения лексем
+   //Р РµРіРёСЃС‚СЂ Р·РЅР°С‡РµРЅРёСЏ С…СЂР°РЅРёС‚ Р·РЅР°С‡РµРЅРёСЏ Р»РµРєСЃРµРј
    int register_value;
 
-   //Номер строки хранит номер текущей строки в программе
+   //РќРѕРјРµСЂ СЃС‚СЂРѕРєРё С…СЂР°РЅРёС‚ РЅРѕРјРµСЂ С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРё РІ РїСЂРѕРіСЂР°РјРјРµ
    int number_line = 0;
 
-   //Флаг константы равен 1, если была прочитана константа после ключевого слова push, и 0, если был прочитан номер строки после слова jmp или ji
+   //Р¤Р»Р°Рі РєРѕРЅСЃС‚Р°РЅС‚С‹ СЂР°РІРµРЅ 1, РµСЃР»Рё Р±С‹Р»Р° РїСЂРѕС‡РёС‚Р°РЅР° РєРѕРЅСЃС‚Р°РЅС‚Р° РїРѕСЃР»Рµ РєР»СЋС‡РµРІРѕРіРѕ СЃР»РѕРІР° push, Рё 0, РµСЃР»Рё Р±С‹Р» РїСЂРѕС‡РёС‚Р°РЅ РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё РїРѕСЃР»Рµ СЃР»РѕРІР° jmp РёР»Рё ji
    bool flag_constant;
    
-   //Флаг остановки
+   //Р¤Р»Р°Рі РѕСЃС‚Р°РЅРѕРІРєРё
    bool stop = 0;
 
 
@@ -373,7 +373,7 @@ void Lexical_Analyzer(const char* filename)
          {
          case (TokenType::LETTER)://M1
 
-            state = M1;//Обнаружение команд
+            state = M1;//РћР±РЅР°СЂСѓР¶РµРЅРёРµ РєРѕРјР°РЅРґ
             break;
 
          case (TokenType::LF)://A2f
@@ -436,7 +436,7 @@ void Lexical_Analyzer(const char* filename)
 
             if (token.value != '=')
             {
-               //ОШИБКА!!!
+               //РћРЁРР‘РљРђ!!!
                state = Stop;
                break;
             }
@@ -450,7 +450,7 @@ void Lexical_Analyzer(const char* filename)
          case (TokenType::SPACE)://C1g
 
             if (register_relationship == Not)
-               state = Stop;//ОШИБКА!!!
+               state = Stop;//РћРЁРР‘РљРђ!!!
             Create_Token(register_type_token, register_indicator, register_value, register_relationship, number_line);
 
             state = C1;
@@ -459,7 +459,7 @@ void Lexical_Analyzer(const char* filename)
          case (TokenType::LF)://A2e
 
             if (register_relationship == Not)
-               state = Stop;//ОШИБКА!!!
+               state = Stop;//РћРЁРР‘РљРђ!!!
             Create_Token(register_type_token, register_indicator, register_value, register_relationship, number_line);
             number_line++;
 
@@ -469,7 +469,7 @@ void Lexical_Analyzer(const char* filename)
          case (TokenType::SEMI_COLON)://I2d
 
             if (register_relationship == Not)
-               state = Stop;//ОШИБКА!!!
+               state = Stop;//РћРЁРР‘РљРђ!!!
             Create_Token(register_type_token, register_indicator, register_value, register_relationship, number_line);
             register_type_token = TokenType::COMMENT;
 
@@ -479,7 +479,7 @@ void Lexical_Analyzer(const char* filename)
          case (TokenType::END)://EXIT2
 
             if (register_relationship == Not)
-               state = Stop;//ОШИБКА!!!
+               state = Stop;//РћРЁРР‘РљРђ!!!
             Create_Token(register_type_token, register_indicator, register_value, register_relationship, number_line);
             register_type_token = TokenType::END;
             Create_Token(register_type_token, register_indicator, register_value, register_relationship, number_line);
@@ -738,7 +738,7 @@ void Lexical_Analyzer(const char* filename)
 
          case (TokenType::SPACE)://C1f
 
-            Добавить переменную;
+            Р”РѕР±Р°РІРёС‚СЊ РїРµСЂРµРјРµРЅРЅСѓСЋ;
             Create_Token(register_type_token, register_indicator, register_value, register_relationship, number_line);
 
             state = C1;
@@ -746,7 +746,7 @@ void Lexical_Analyzer(const char* filename)
 
          case (TokenType::LF)://A2d
             
-            Добавить переменную;
+            Р”РѕР±Р°РІРёС‚СЊ РїРµСЂРµРјРµРЅРЅСѓСЋ;
             Create_Token(register_type_token, register_indicator, register_value, register_relationship, number_line);
             number_line++;
 
@@ -755,7 +755,7 @@ void Lexical_Analyzer(const char* filename)
 
          case (TokenType::SEMI_COLON)://I2c
 
-            Добавить переменную;
+            Р”РѕР±Р°РІРёС‚СЊ РїРµСЂРµРјРµРЅРЅСѓСЋ;
             Create_Token(register_type_token, register_indicator, register_value, register_relationship, number_line);
             register_type_token = TokenType::COMMENT;
 
@@ -764,7 +764,7 @@ void Lexical_Analyzer(const char* filename)
 
          case (TokenType::END)://EXIT4
 
-            Добавить переменную;
+            Р”РѕР±Р°РІРёС‚СЊ РїРµСЂРµРјРµРЅРЅСѓСЋ;
             Create_Token(register_type_token, register_indicator, register_value, register_relationship, number_line);
             register_type_token = TokenType::END;
             Create_Token(register_type_token, register_indicator, register_value, register_relationship, number_line);
